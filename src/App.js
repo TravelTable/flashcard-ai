@@ -1,137 +1,194 @@
-import React, { useState } from "react";
-import FlashcardViewer from "./FlashcardViewer";
-import { generateFlashcards } from "./api";
+import React, { useState, useEffect } from "react";
+import WelcomeScreen from "./WelcomeScreen";
+import SubjectSelection from "./SubjectSelection";
+import LessonQuizSession from "./LessonQuizSession";
+import Dashboard from "./Dashboard";
+import DevPanel from "./DevPanel";
+import { generateFlashcardsAndQuizzes } from "./api";
 import "./App.css";
 
+const SESSIONS_KEY = "flashbot_sessions_v1";
+
 function App() {
-  const [subject, setSubject] = useState("NSW Year 11 Computer Enterprise");
-  const [syllabus, setSyllabus] = useState("");
-  const [bibliography, setBibliography] = useState(
-    `Anazifa R & Djukri D (2017), Australian Government (2005), Connolly R et al. (2015), Deloitte (2017), Education Council (2015, 2019), FYA (2017), Heersink H & Moskal B (2010), ITEEA, K–12 CS Framework Steering Committee, Lapuz AME & Fugencio MN (2020), NESA, NSW Department of Education (2017), Shute VJ, Sun C & Asbell-Clarke J (2017), Sterling L (2016), Terada Y (2021), The Royal Society (2017), Thomson S (2015), Wing J (2006).`
-  );
-  const [flashcards, setFlashcards] = useState([]);
+  const [step, setStep] = useState(0); // 0: Welcome, 1: Subject, 2: Loading, 3: Lesson/Quiz, 4: Dashboard
+  const [subjectInfo, setSubjectInfo] = useState(null);
+  const [lessonData, setLessonData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [jsonView, setJsonView] = useState(false);
+  const [apiError, setApiError] = useState("");
+  const [sessions, setSessions] = useState([]);
 
-  const handleGenerate = async () => {
+  // Dev mode and analytics state
+  const [devMode, setDevMode] = useState(false);
+  const [analytics, setAnalytics] = useState({
+    totalVisits: 0,
+    totalSessions: 0,
+    subjectCounts: {},
+    lastVisit: null,
+  });
+
+  // Load sessions from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem(SESSIONS_KEY);
+    if (stored) {
+      try {
+        setSessions(JSON.parse(stored));
+      } catch {
+        setSessions([]);
+      }
+    }
+    // Enable dev mode if ?dev=1 in URL or localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("dev") === "1" || localStorage.getItem("flashbot_devmode") === "1") {
+      setDevMode(true);
+      localStorage.setItem("flashbot_devmode", "1");
+    }
+    // Update analytics
+    let analyticsData = JSON.parse(localStorage.getItem("flashbot_analytics") || "{}");
+    analyticsData.totalVisits = (analyticsData.totalVisits || 0) + 1;
+    analyticsData.lastVisit = new Date().toISOString();
+    localStorage.setItem("flashbot_analytics", JSON.stringify(analyticsData));
+    setAnalytics({
+      totalVisits: analyticsData.totalVisits || 1,
+      totalSessions: analyticsData.totalSessions || 0,
+      subjectCounts: analyticsData.subjectCounts || {},
+      lastVisit: analyticsData.lastVisit,
+    });
+  }, []);
+
+  // Save sessions to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+  }, [sessions]);
+
+  // When a session is completed, update analytics
+  useEffect(() => {
+    if (sessions.length > 0) {
+      let analyticsData = JSON.parse(localStorage.getItem("flashbot_analytics") || "{}");
+      analyticsData.totalSessions = sessions.length;
+      analyticsData.subjectCounts = analyticsData.subjectCounts || {};
+      const lastSession = sessions[sessions.length - 1];
+      if (lastSession && lastSession.subject) {
+        analyticsData.subjectCounts[lastSession.subject] = (analyticsData.subjectCounts[lastSession.subject] || 0) + 1;
+      }
+      localStorage.setItem("flashbot_analytics", JSON.stringify(analyticsData));
+      setAnalytics({
+        totalVisits: analyticsData.totalVisits || 1,
+        totalSessions: analyticsData.totalSessions || 0,
+        subjectCounts: analyticsData.subjectCounts || {},
+        lastVisit: analyticsData.lastVisit,
+      });
+    }
+  }, [sessions]);
+
+  // When user clicks "Get Started"
+  const handleStart = () => setStep(1);
+
+  // When user selects subject/syllabus and clicks "Continue"
+  const handleSubjectChosen = async (info) => {
+    setSubjectInfo(info);
+    setApiError("");
     setLoading(true);
-    setError("");
-    setFlashcards([]);
+    setStep(2);
     try {
-      const prompt = `
-You are an expert teacher and exam coach.
-Your task is to generate as many high-quality Q&A flashcards as possible for student revision, based on the official syllabus and the following bibliography.
-
-Instructions:
-- Each flashcard should focus on a key concept, syllabus point, definition, process, technology, or example relevant to the "${subject}" course.
-- Make the "question" suitable for the front of a flashcard (exam-style, concise, clear, may use syllabus keywords).
-- Make the "answer" clear, accurate, and student-friendly, as it should appear on the back of the card.
-- Do NOT limit the number of flashcards—cover all major syllabus topics, outcomes, and bibliography themes.
-- Output ONLY a JSON array, like this:
-[
-  {"question": "...", "answer": "..."},
-  {"question": "...", "answer": "..."},
-  ...
-]
-
-Bibliography:
-${bibliography}
-
-${syllabus ? `If provided, also incorporate content from the full syllabus or module dot-points:\n${syllabus}` : ""}
-Do not include explanations or extra text—just the JSON array of flashcards.
-      `.trim();
-
-      const result = await generateFlashcards(prompt);
-      setFlashcards(result);
+      const data = await generateFlashcardsAndQuizzes(info);
+      setLessonData(data);
+      setStep(3);
     } catch (err) {
-      setError(
-        err.message ||
-          "An error occurred while generating flashcards. Please try again."
-      );
+      setApiError(err.message || "Failed to generate lesson. Please try again.");
+      setStep(1);
     }
     setLoading(false);
   };
 
-  const handleCopyJSON = () => {
-    navigator.clipboard.writeText(JSON.stringify(flashcards, null, 2));
+  // When lesson/quiz session is complete
+  const handleSessionComplete = (sessionStats) => {
+    setSessions([
+      ...sessions,
+      {
+        subject: subjectInfo.subject,
+        date: new Date().toISOString(),
+        xp: sessionStats?.xp || 0,
+        score: sessionStats?.score || "",
+        streak: sessionStats?.streak || 0,
+      },
+    ]);
+    setLessonData(null);
+    setSubjectInfo(null);
+    setStep(4); // Show dashboard
   };
+
+  // Start a new lesson from dashboard
+  const handleStartNewLesson = () => setStep(1);
 
   return (
     <div className="App">
-      <header>
-        <h1>Ultimate AI Flashcard Generator</h1>
-        <p>
-          Enter a subject/topic and (optionally) syllabus or bibliography. Click
-          "Generate Flashcards" to get a giant JSON array of Q&A pairs for
-          revision.
-        </p>
-      </header>
-      <div className="input-section">
-        <label>
-          <span>Subject/Topic:</span>
-          <input
-            type="text"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            placeholder="e.g. NSW Year 11 Computer Enterprise"
-            autoFocus
-          />
-        </label>
-        <label>
-          <span>Bibliography (optional):</span>
-          <textarea
-            value={bibliography}
-            onChange={(e) => setBibliography(e.target.value)}
-            rows={3}
-          />
-        </label>
-        <label>
-          <span>Syllabus/Module Dot-points (optional):</span>
-          <textarea
-            value={syllabus}
-            onChange={(e) => setSyllabus(e.target.value)}
-            rows={4}
-            placeholder="Paste syllabus or module dot-points here..."
-          />
-        </label>
-        <button onClick={handleGenerate} disabled={loading}>
-          {loading ? "Generating..." : "Generate Flashcards"}
-        </button>
-      </div>
-      {error && <div className="error">{error}</div>}
-      {flashcards.length > 0 && (
-        <div className="results-section">
-          <div className="results-actions">
-            <button onClick={() => setJsonView((v) => !v)}>
-              {jsonView ? "Preview as Flipcards" : "View as JSON"}
-            </button>
-            <button onClick={handleCopyJSON}>Copy JSON</button>
-            <a
-              href={`data:application/json,${encodeURIComponent(
-                JSON.stringify(flashcards, null, 2)
-              )}`}
-              download="flashcards.json"
-              className="export-btn"
-            >
-              Export JSON
-            </a>
-          </div>
-          {jsonView ? (
-            <pre className="json-view">
-              {JSON.stringify(flashcards, null, 2)}
-            </pre>
-          ) : (
-            <FlashcardViewer flashcards={flashcards} />
+      {step === 0 && <WelcomeScreen onStart={handleStart} />}
+      {step === 1 && (
+        <>
+          <SubjectSelection onSubjectChosen={handleSubjectChosen} />
+          {apiError && (
+            <div style={{
+              color: "#b71c1c",
+              background: "#e3f0ff",
+              padding: "1rem",
+              borderRadius: "1.2rem",
+              margin: "1rem auto",
+              maxWidth: 420,
+              fontWeight: 600,
+              textAlign: "center"
+            }}>
+              {apiError}
+            </div>
           )}
+        </>
+      )}
+      {step === 2 && (
+        <div style={{
+          marginTop: "6rem",
+          textAlign: "center",
+          color: "#1976d2",
+          fontSize: "1.25rem",
+          fontWeight: 500
+        }}>
+          <div className="mascot-container" style={{ marginBottom: "1.5rem" }}>
+            {/* Small mascot for loading */}
+            <svg
+              width="70"
+              height="70"
+              viewBox="0 0 140 140"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="robot-mascot"
+              style={{ animation: "mascot-bounce 1.2s infinite" }}
+            >
+              <circle cx="70" cy="70" r="65" fill="#e3f0ff" />
+              <ellipse cx="70" cy="80" rx="45" ry="38" fill="#fff" />
+              <ellipse cx="70" cy="60" rx="38" ry="32" fill="#2196f3" />
+              <ellipse cx="70" cy="60" rx="32" ry="26" fill="#fff" />
+              <ellipse cx="52" cy="60" rx="6" ry="8" fill="#2196f3" />
+              <ellipse cx="88" cy="60" rx="6" ry="8" fill="#2196f3" />
+              <ellipse cx="52" cy="62" rx="2.2" ry="3" fill="#fff" />
+              <ellipse cx="88" cy="62" rx="2.2" ry="3" fill="#fff" />
+              <rect x="56" y="78" width="28" height="6" rx="3" fill="#2196f3" />
+              <ellipse cx="70" cy="110" rx="20" ry="6" fill="#e3f0ff" />
+              <rect x="67" y="18" width="6" height="18" rx="3" fill="#2196f3" />
+              <circle cx="70" cy="15" r="5" fill="#fff" stroke="#2196f3" strokeWidth="2" />
+            </svg>
+          </div>
+          Generating your lesson and quiz...
         </div>
       )}
-      <footer>
-        <p>
-          Powered by OpenAI GPT-4. Built for advanced syllabus-based flashcard
-          generation.
-        </p>
-      </footer>
+      {step === 3 && lessonData && (
+        <LessonQuizSession
+          flashcards={lessonData.flashcards}
+          quizzes={lessonData.quizzes}
+          onComplete={(stats) => handleSessionComplete(stats)}
+        />
+      )}
+      {step === 4 && (
+        <Dashboard sessions={sessions} onStartNew={handleStartNewLesson} />
+      )}
+      {devMode && <DevPanel analytics={analytics} />}
     </div>
   );
 }

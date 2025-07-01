@@ -1,130 +1,59 @@
 .App {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  max-width: 780px;
-  margin: 0 auto;
-  padding: 2rem;
-  background: #f8fafc;
   min-height: 100vh;
-}
-
-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-header h1 {
-  font-size: 2.2rem;
-  margin-bottom: 0.5rem;
-  color: #1a237e;
-}
-
-header p {
-  color: #374151;
-}
-
-.input-section {
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px #0001;
-  margin-bottom: 2rem;
+  background: linear-gradient(135deg, #e3f0ff 0%, #ffffff 100%);
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  align-items: center;
+  justify-content: flex-start;
+  padding-bottom: 2rem;
 }
 
-.input-section label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  font-weight: 500;
-  color: #1a237e;
+@media (max-width: 600px) {
+  .App {
+    padding: 0 0.2rem;
+  }
 }
 
-.input-section input,
-.input-section textarea {
-  font-size: 1rem;
-  padding: 0.5rem;
-  border: 1px solid #bdbdbd;
-  border-radius: 6px;
-  background: #f0f4fa;
-  resize: vertical;
+/* General headings and text */
+h1, h2, h3 {
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  color: #1976d2;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
-.input-section button {
-  margin-top: 0.5rem;
-  padding: 0.7rem 1.5rem;
-  font-size: 1.1rem;
-  background: #1976d2;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.2s;
+b, strong {
+  color: #1976d2;
 }
 
-.input-section button:disabled {
-  background: #90caf9;
-  cursor: not-allowed;
+input, textarea, button {
+  font-family: inherit;
 }
 
-.error {
-  color: #b71c1c;
-  background: #ffebee;
-  padding: 1rem;
-  border-radius: 8px;
-  margin: 1rem 0;
-  font-weight: bold;
+/* Remove default focus outlines and use custom ones for accessibility */
+input:focus, textarea:focus, button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #2196f3;
 }
 
-.results-section {
-  margin-top: 2rem;
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px #0001;
+/* Hide scrollbars for dropdowns and textareas on Webkit browsers */
+.subject-dropdown::-webkit-scrollbar,
+.syllabus-input::-webkit-scrollbar {
+  width: 0.3em;
+  background: #e3f0ff;
+}
+.subject-dropdown::-webkit-scrollbar-thumb,
+.syllabus-input::-webkit-scrollbar-thumb {
+  background: #b3d2f9;
+  border-radius: 1em;
 }
 
-.results-actions {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-
-.results-actions button,
-.results-actions .export-btn {
-  padding: 0.5rem 1.2rem;
-  font-size: 1rem;
-  background: #1976d2;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  text-decoration: none;
-  transition: background 0.2s;
-}
-
-.results-actions button:hover,
-.results-actions .export-btn:hover {
-  background: #0d47a1;
-}
-
-.json-view {
-  background: #23272f;
-  color: #e3eaff;
-  padding: 1rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  overflow-x: auto;
-  max-height: 420px;
-}
-
-footer {
-  margin-top: 3rem;
-  text-align: center;
-  color: #607d8b;
-  font-size: 0.95rem;
+/* Responsive for mobile */
+@media (max-width: 500px) {
+  .welcome-screen,
+  .subject-selection {
+    padding: 1.1rem 0.3rem 1.5rem 0.3rem;
+    border-radius: 0.8rem;
+  }
 }

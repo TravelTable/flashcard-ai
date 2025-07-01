@@ -1,4 +1,3 @@
-// api/generate-flashcards.js
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed" });
@@ -31,7 +30,7 @@ export default async function handler(req, res) {
           {
             role: "system",
             content:
-              "You are a world-class exam coach and teacher. You generate as many high-quality Q&A flashcards as possible, in JSON array format, for student revision based on the prompt. Output only the JSON array, no extra text.",
+              "You are a world-class exam coach and teacher. You generate as many high-quality flashcards and quiz questions as possible, in JSON object format, for student revision based on the prompt. Output only the JSON object, no extra text.",
           },
           {
             role: "user",
@@ -52,25 +51,25 @@ export default async function handler(req, res) {
     const data = await response.json();
     let content = data.choices[0]?.message?.content || "";
 
-    // Extract JSON array from content
-    let jsonStart = content.indexOf("[");
-    let jsonEnd = content.lastIndexOf("]");
+    // Try to extract JSON object from content
+    let jsonStart = content.indexOf("{");
+    let jsonEnd = content.lastIndexOf("}");
     if (jsonStart === -1 || jsonEnd === -1) {
-      res.status(500).json({ error: "Could not find JSON array in API response." });
+      res.status(500).json({ error: "Could not find JSON object in API response." });
       return;
     }
     let jsonString = content.slice(jsonStart, jsonEnd + 1);
 
-    let flashcards;
+    let parsed;
     try {
-      flashcards = JSON.parse(jsonString);
-      if (!Array.isArray(flashcards)) throw new Error();
+      parsed = JSON.parse(jsonString);
+      if (!parsed.flashcards || !parsed.quizzes) throw new Error();
     } catch (e) {
-      res.status(500).json({ error: "Failed to parse flashcards JSON from API response." });
+      res.status(500).json({ error: "Failed to parse flashcards/quizzes JSON from API response." });
       return;
     }
 
-    res.status(200).json({ flashcards });
+    res.status(200).json(parsed);
   } catch (err) {
     res.status(500).json({ error: err.message || "Unknown server error" });
   }
