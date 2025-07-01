@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import React, { useState, useRef, useEffect } from "react";
-=======
-import React, { useState } from "react";
->>>>>>> 3d531cb65dbc1f1ca713ca6d6a6a7eccc8ab2aba
 import "./SubjectSelection.css";
 
 const POPULAR_SUBJECTS = [
@@ -17,7 +13,6 @@ const POPULAR_SUBJECTS = [
   "French Language",
   "Computer Science",
   "Business Studies",
-<<<<<<< HEAD
   "World Geography",
   "AP Calculus AB",
   "AP Calculus BC",
@@ -641,9 +636,6 @@ const POPULAR_SUBJECTS = [
   "GCSE English for HR Yours Gratefully Yours",
   "GCSE English for HR Yours Appreciatively Yours",
   "GCSE English for HR Yours Obligingly Yours"
-=======
-  "World Geography"
->>>>>>> 3d531cb65dbc1f1ca713ca6d6a6a7eccc8ab2aba
 ];
 
 function SubjectSelection({ onSubjectChosen }) {
@@ -652,32 +644,22 @@ function SubjectSelection({ onSubjectChosen }) {
   const [chosenSubject, setChosenSubject] = useState("");
   const [syllabus, setSyllabus] = useState("");
   const [error, setError] = useState("");
-<<<<<<< HEAD
   const [showDropdown, setShowDropdown] = useState(false);
   const [subjects, setSubjects] = useState(POPULAR_SUBJECTS);
   const searchBoxRef = useRef(null);
-=======
->>>>>>> 3d531cb65dbc1f1ca713ca6d6a6a7eccc8ab2aba
 
   // Update filtered subjects as user types
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearch(value);
     setFilteredSubjects(
-<<<<<<< HEAD
       subjects.filter((subj) =>
-=======
-      POPULAR_SUBJECTS.filter((subj) =>
->>>>>>> 3d531cb65dbc1f1ca713ca6d6a6a7eccc8ab2aba
         subj.toLowerCase().includes(value.toLowerCase())
       )
     );
     setChosenSubject(value);
     setError("");
-<<<<<<< HEAD
     setShowDropdown(true);
-=======
->>>>>>> 3d531cb65dbc1f1ca713ca6d6a6a7eccc8ab2aba
   };
 
   // When user clicks a subject from the list
@@ -685,7 +667,6 @@ function SubjectSelection({ onSubjectChosen }) {
     setSearch(subject);
     setChosenSubject(subject);
     setError("");
-<<<<<<< HEAD
     setShowDropdown(false);
   };
 
@@ -706,8 +687,6 @@ function SubjectSelection({ onSubjectChosen }) {
     setSearch(trimmed);
     setError("");
     setShowDropdown(false);
-=======
->>>>>>> 3d531cb65dbc1f1ca713ca6d6a6a7eccc8ab2aba
   };
 
   // When user clicks "Continue"
@@ -722,7 +701,6 @@ function SubjectSelection({ onSubjectChosen }) {
     });
   };
 
-<<<<<<< HEAD
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
@@ -815,52 +793,6 @@ function SubjectSelection({ onSubjectChosen }) {
           Continue
         </button>
       </div>
-=======
-  return (
-    <div className="subject-selection">
-      <h2 className="subject-title">Choose Your Subject</h2>
-      <p className="subject-desc">
-        Search for your subject or add a new one. <br />
-        <span className="subject-ai-tip">
-          Our AI can generate flashcards and quizzes for any subject or curriculum!
-        </span>
-      </p>
-      <div className="subject-search-box">
-        <input
-          type="text"
-          value={search}
-          onChange={handleSearchChange}
-          placeholder="Search or add your subject..."
-          className="subject-search-input"
-          autoFocus
-        />
-        {search && filteredSubjects.length > 0 && (
-          <ul className="subject-dropdown">
-            {filteredSubjects.map((subject) => (
-              <li
-                key={subject}
-                className="subject-dropdown-item"
-                onClick={() => handleSubjectClick(subject)}
-              >
-                {subject}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      <div className="subject-or">or</div>
-      <textarea
-        className="syllabus-input"
-        value={syllabus}
-        onChange={(e) => setSyllabus(e.target.value)}
-        rows={4}
-        placeholder="Paste syllabus or module dot-points here (optional, for more tailored flashcards and quizzes)..."
-      />
-      {error && <div className="subject-error">{error}</div>}
-      <button className="subject-continue-btn" onClick={handleContinue}>
-        Continue
-      </button>
->>>>>>> 3d531cb65dbc1f1ca713ca6d6a6a7eccc8ab2aba
     </div>
   );
 }
