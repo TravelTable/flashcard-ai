@@ -1,0 +1,71 @@
+.welcome-screen {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e3f0ff 0%, #ffffff 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.5rem;
+  text-align: center;
+}
+
+.mascot-container {
+  margin-bottom: 1.5rem;
+  animation: mascot-bounce 1.8s infinite;
+}
+
+@keyframes mascot-bounce {
+  0%, 100% { transform: translateY(0); }
+  20% { transform: translateY(-12px); }
+  40% { transform: translateY(-18px); }
+  60% { transform: translateY(-12px); }
+  80% { transform: translateY(-4px); }
+}
+
+.robot-mascot {
+  width: 140px;
+  height: 140px;
+  display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 4px 18px #2196f355);
+}
+
+.welcome-title {
+  font-size: 2.2rem;
+  color: #1976d2;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.welcome-message {
+  font-size: 1.18rem;
+  color: #225;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.get-started-btn {
+  background: #2196f3;
+  color: #fff;
+  font-size: 1.25rem;
+  padding: 0.85rem 2.5rem;
+  border: none;
+  border-radius: 2rem;
+  font-weight: 600;
+  box-shadow: 0 4px 16px #2196f344;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  margin-top: 0.5rem;
+}
+
+.get-started-btn:hover,
+.get-started-btn:focus {
+  background: #1976d2;
+  box-shadow: 0 6px 22px #1976d244;
+  transform: translateY(-2px) scale(1.03);
+  outline: none;
+}
