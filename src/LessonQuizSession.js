@@ -62,6 +62,16 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
   const [mascotMood, setMascotMood] = useState("neutral");
   const [quizResults, setQuizResults] = useState([]);
 
+  // For input-based quiz types
+  const [quizInput, setQuizInput] = useState("");
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+
+  // Reset input state when moving to a new quiz
+  React.useEffect(() => {
+    setQuizInput("");
+    setQuizSubmitted(false);
+  }, [quizIndex, step]);
+
   // --- Flashcard Logic ---
   const handleFlip = () => setShowAnswer((v) => !v);
 
@@ -133,6 +143,7 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
                 className="quiz-option-btn"
                 onClick={() => handleQuizAnswer(opt === q.answer)}
                 tabIndex={0}
+                disabled={quizSubmitted}
               >
                 {opt}
               </button>
@@ -151,6 +162,7 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
               className="quiz-option-btn"
               onClick={() => handleQuizAnswer(q.answer === "True")}
               tabIndex={0}
+              disabled={quizSubmitted}
             >
               True
             </button>
@@ -158,6 +170,7 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
               className="quiz-option-btn"
               onClick={() => handleQuizAnswer(q.answer === "False")}
               tabIndex={0}
+              disabled={quizSubmitted}
             >
               False
             </button>
@@ -166,12 +179,9 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
       );
     }
     if (q.type === "fillblank") {
-      const [userInput, setUserInput] = useState("");
-      const [submitted, setSubmitted] = useState(false);
-
       const handleSubmit = () => {
-        const isCorrect = userInput.trim().toLowerCase() === q.answer.trim().toLowerCase();
-        setSubmitted(true);
+        const isCorrect = quizInput.trim().toLowerCase() === q.answer.trim().toLowerCase();
+        setQuizSubmitted(true);
         handleQuizAnswer(isCorrect);
       };
 
@@ -181,16 +191,16 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
           <div className="card-q">{q.question}</div>
           <input
             className="quiz-input"
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            disabled={submitted}
+            value={quizInput}
+            onChange={(e) => setQuizInput(e.target.value)}
+            disabled={quizSubmitted}
             placeholder="Type your answer"
             tabIndex={0}
           />
           <button
             className="quiz-option-btn"
             onClick={handleSubmit}
-            disabled={submitted || !userInput.trim()}
+            disabled={quizSubmitted || !quizInput.trim()}
           >
             Submit
           </button>
@@ -198,15 +208,12 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
       );
     }
     if (q.type === "short") {
-      const [userInput, setUserInput] = useState("");
-      const [submitted, setSubmitted] = useState(false);
-
       const handleSubmit = () => {
         // Accept if answer is similar (case-insensitive substring match)
         const isCorrect =
-          userInput.trim().toLowerCase().includes(q.answer.trim().toLowerCase()) ||
-          q.answer.trim().toLowerCase().includes(userInput.trim().toLowerCase());
-        setSubmitted(true);
+          quizInput.trim().toLowerCase().includes(q.answer.trim().toLowerCase()) ||
+          q.answer.trim().toLowerCase().includes(quizInput.trim().toLowerCase());
+        setQuizSubmitted(true);
         handleQuizAnswer(isCorrect);
       };
 
@@ -216,16 +223,16 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
           <div className="card-q">{q.question}</div>
           <input
             className="quiz-input"
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            disabled={submitted}
+            value={quizInput}
+            onChange={(e) => setQuizInput(e.target.value)}
+            disabled={quizSubmitted}
             placeholder="Type your answer"
             tabIndex={0}
           />
           <button
             className="quiz-option-btn"
             onClick={handleSubmit}
-            disabled={submitted || !userInput.trim()}
+            disabled={quizSubmitted || !quizInput.trim()}
           >
             Submit
           </button>
