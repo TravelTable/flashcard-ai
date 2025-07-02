@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./LessonQuizSession.css";
+import FlashcardViewer from "./FlashcardViewer";
 
 // Helper to shuffle an array (for quiz options)
 function shuffle(array) {
@@ -26,7 +27,7 @@ function MascotFace({ mood = "neutral" }) {
     color = "#2196f3";
   }
   return (
-    <svg width="44" height="44" viewBox="0 0 140 140" style={{ display: "block" }}>
+    <svg width="58" height="58" viewBox="0 0 140 140" style={{ display: "block" }}>
       <ellipse cx="70" cy="70" rx="55" ry="55" fill="#e3f0ff" />
       <ellipse cx="70" cy="70" rx="38" ry="32" fill={color} />
       <ellipse cx="70" cy="70" rx="32" ry="26" fill="#fff" />
@@ -53,42 +54,37 @@ function XPBar({ progress, total }) {
 
 function LessonQuizSession({ flashcards, quizzes, onComplete }) {
   const [step, setStep] = useState(0); // 0: flashcards, 1: quizzes, 2: complete
-  const [flashIndex, setFlashIndex] = useState(0);
   const [quizIndex, setQuizIndex] = useState(0);
-  const [showAnswer, setShowAnswer] = useState(false);
   const [xp, setXp] = useState(0);
   const [streak, setStreak] = useState(0);
   const [maxStreak, setMaxStreak] = useState(0);
   const [mascotMood, setMascotMood] = useState("neutral");
   const [quizResults, setQuizResults] = useState([]);
-
-  // For input-based quiz types
   const [quizInput, setQuizInput] = useState("");
   const [quizSubmitted, setQuizSubmitted] = useState(false);
 
+  // Track flashcard session stats from FlashcardViewer
+  const [flashcardSessionStats, setFlashcardSessionStats] = useState({
+    xp: 0,
+    completed: false,
+    knownCount: 0,
+    unknownCount: 0,
+    timeSpent: 0,
+    streak: 0,
+    maxStreak: 0,
+    score: "",
+  });
+
   // Reset input state when moving to a new quiz
-  React.useEffect(() => {
+  useEffect(() => {
     setQuizInput("");
     setQuizSubmitted(false);
   }, [quizIndex, step]);
 
-  // --- Flashcard Logic ---
-  const handleFlip = () => setShowAnswer((v) => !v);
-
-  const handleNextFlash = () => {
-    setShowAnswer(false);
-    setXp((prev) => prev + 5);
-    if (flashIndex < flashcards.length - 1) {
-      setFlashIndex(flashIndex + 1);
-    } else {
-      setStep(1); // Move to quizzes
-    }
-  };
-
   // --- Quiz Logic ---
   const handleQuizAnswer = (isCorrect) => {
-    setQuizResults([
-      ...quizResults,
+    setQuizResults((prev) => [
+      ...prev,
       { index: quizIndex, correct: isCorrect }
     ]);
     setXp((prev) => prev + (isCorrect ? 10 : 0));
@@ -106,25 +102,6 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
         setStep(2); // Complete
       }
     }, 900);
-  };
-
-  // --- Render Flashcard ---
-  const renderFlashcard = () => {
-    const card = flashcards[flashIndex];
-    return (
-      <div className="lesson-card animated-flip" onClick={handleFlip} tabIndex={0}>
-        <div className={`card-face card-front ${showAnswer ? "hide" : ""}`}>
-          <span className="card-label">Flashcard</span>
-          <div className="card-q">{card.question}</div>
-          <div className="card-tip">Click to flip</div>
-        </div>
-        <div className={`card-face card-back ${showAnswer ? "show" : ""}`}>
-          <span className="card-label">Answer</span>
-          <div className="card-a">{card.answer}</div>
-          <div className="card-tip">Click to flip back</div>
-        </div>
-      </div>
-    );
   };
 
   // --- Render Quiz Card ---
@@ -246,23 +223,28 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
   const renderComplete = () => {
     const correct = quizResults.filter(r => r.correct).length;
     const total = quizResults.length;
+    // Merge flashcard stats and quiz stats for session summary
+    const totalXp = xp + flashcardSessionStats.xp;
+    const totalScore = `${correct} / ${total}`;
+    const totalStreak = Math.max(maxStreak, flashcardSessionStats.maxStreak);
+
     return (
       <div className="lesson-complete">
         <MascotFace mood="happy" />
         <h2>Session Complete!</h2>
         <div className="xp-summary">
-          <span>XP Earned: <b>{xp}</b></span>
-          <span>Quiz Score: <b>{correct} / {total}</b></span>
+          <span>XP Earned: <b>{totalXp}</b></span>
+          <span>Quiz Score: <b>{totalScore}</b></span>
         </div>
         <div className="streak-summary">
-          {maxStreak > 1 && (
-            <span>🔥 Longest Streak: {maxStreak} correct in a row!</span>
+          {totalStreak > 1 && (
+            <span>🔥 Longest Streak: {totalStreak} correct in a row!</span>
           )}
         </div>
         <button className="lesson-restart-btn" onClick={() => onComplete({
-          xp,
-          score: `${correct} / ${total}`,
-          streak: maxStreak
+          xp: totalXp,
+          score: totalScore,
+          streak: totalStreak
         })}>
           Back to Dashboard
         </button>
@@ -270,21 +252,53 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
     );
   };
 
+  // --- FlashcardViewer Completion Handler ---
+  function handleFlashcardSessionComplete(stats) {
+    // stats: { xp, completed, knownCount, unknownCount, timeSpent, streak, maxStreak, score }
+    setFlashcardSessionStats(stats);
+    setXp((prev) => prev + stats.xp);
+    setStep(1); // Move to quizzes
+  }
+
   // --- Main Render ---
   return (
     <div className="lesson-quiz-session">
       <div className="lesson-header">
         <MascotFace mood={mascotMood} />
-        <XPBar progress={xp} total={flashcards.length * 5 + quizzes.length * 10} />
+        <XPBar progress={xp + flashcardSessionStats.xp} total={flashcards.length * 5 + quizzes.length * 10} />
       </div>
       {step === 0 && (
         <div>
           <div className="lesson-progress">
-            Flashcard {flashIndex + 1} / {flashcards.length}
+            Flashcards ({flashcards.length})
           </div>
-          {renderFlashcard()}
-          <button className="lesson-next-btn" onClick={handleNextFlash}>
-            {flashIndex < flashcards.length - 1 ? "Next" : "Start Quiz"}
+          <FlashcardViewer
+            flashcards={flashcards}
+            onSessionComplete={handleFlashcardSessionComplete}
+            sessionXpPerCard={5}
+            showSessionCompleteButton={true}
+            showProgressBar={true}
+            showKnownUnknown={true}
+            showStatsButton={true}
+            showTtsButton={true}
+            showDarkModeButton={true}
+            showImportExportButton={true}
+          />
+          <button
+            className="lesson-next-btn"
+            onClick={() => handleFlashcardSessionComplete({
+              xp: flashcardSessionStats.xp || (flashcards.length * 5),
+              completed: true,
+              knownCount: flashcardSessionStats.knownCount || 0,
+              unknownCount: flashcardSessionStats.unknownCount || 0,
+              timeSpent: flashcardSessionStats.timeSpent || 0,
+              streak: flashcardSessionStats.streak || 0,
+              maxStreak: flashcardSessionStats.maxStreak || 0,
+              score: flashcardSessionStats.score || "",
+            })}
+            style={{ marginTop: "1.5rem" }}
+          >
+            {flashcardSessionStats.completed ? "Continue to Quiz" : "Skip to Quiz"}
           </button>
         </div>
       )}
