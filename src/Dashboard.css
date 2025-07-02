@@ -1,94 +1,199 @@
+/* Dashboard.css - Advanced, Modern, Unified with App Theme, Accessible, Responsive, Animated */
+
+/* === VARIABLES === */
+:root {
+  --primary: #1976d2;
+  --primary-light: #42a5f5;
+  --primary-bg: #f7faff;
+  --secondary-bg: #e3eaff;
+  --accent: #ff9800;
+  --success: #43a047;
+  --danger: #e53935;
+  --text-main: #263859;
+  --text-light: #fff;
+  --text-muted: #90caf9;
+  --shadow-main: 0 8px 40px #1976d222, 0 2px 10px #2196f344;
+  --shadow-card: 0 2px 18px #2196f322, 0 1px 4px #1976d211;
+  --shadow-btn: 0 2px 12px #2196f344;
+  --radius-main: 22px;
+  --radius-card: 18px;
+  --radius-btn: 2.2rem;
+  --radius-small: 6px;
+  --transition-main: 0.3s cubic-bezier(0.4, 2, 0.6, 1);
+  --font-main: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+/* === DASHBOARD CONTAINER === */
 .dashboard {
   max-width: 540px;
   margin: 0 auto;
   padding: 2.2rem 1.5rem 2.5rem 1.5rem;
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 6px 32px #1976d211, 0 1.5px 6px #2196f322;
+  background: linear-gradient(120deg, var(--primary-bg) 60%, var(--secondary-bg) 100%);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-main);
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-top: 3rem;
+  font-family: var(--font-main);
+  animation: fadeInUp 0.7s cubic-bezier(0.4, 2, 0.6, 1);
+  min-width: 0;
+  width: 100%;
 }
 
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(40px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
+/* === TITLE === */
 .dashboard-title {
-  font-size: 1.7rem;
-  color: #1976d2;
-  font-weight: 700;
+  font-size: 2rem;
+  color: var(--primary);
+  font-weight: 800;
   margin-bottom: 1.2rem;
   letter-spacing: 0.01em;
+  text-shadow: 0 1px 2px #fff8;
+  text-align: center;
+  width: 100%;
 }
 
+/* === EMPTY STATE === */
 .dashboard-empty {
   text-align: center;
-  color: #1976d2;
-  font-size: 1.13rem;
+  color: var(--primary);
+  font-size: 1.18rem;
   margin-bottom: 1.5rem;
+  padding: 1.2rem 0.5rem;
+  background: var(--secondary-bg);
+  border-radius: 1.2rem;
+  box-shadow: 0 1px 8px #2196f322;
+  animation: fadeInUp 0.7s cubic-bezier(0.4, 2, 0.6, 1);
 }
 
+/* === TABLE === */
 .dashboard-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin-bottom: 1.5rem;
-  background: #e3f0ff;
+  background: var(--secondary-bg);
   border-radius: 1.2rem;
   overflow: hidden;
   box-shadow: 0 2px 12px #2196f322;
+  animation: fadeInUp 0.7s cubic-bezier(0.4, 2, 0.6, 1);
 }
 
 .dashboard-table th,
 .dashboard-table td {
   padding: 0.7rem 1rem;
   text-align: center;
-  font-size: 1.07rem;
+  font-size: 1.09rem;
+  transition: background 0.2s;
 }
 
 .dashboard-table th {
-  background: #2196f3;
-  color: #fff;
-  font-weight: 600;
+  background: var(--primary-light);
+  color: var(--text-light);
+  font-weight: 700;
   letter-spacing: 0.01em;
+  border-bottom: 2px solid var(--primary);
+  text-shadow: 0 1px 2px #1976d244;
 }
 
 .dashboard-table td {
-  color: #1976d2;
-  background: #e3f0ff;
+  color: var(--primary);
+  background: var(--secondary-bg);
+  font-weight: 600;
 }
 
 .dashboard-table tr:nth-child(even) td {
-  background: #f5faff;
+  background: var(--primary-bg);
 }
 
+.dashboard-table tr:hover td {
+  background: #dbeafe;
+  color: var(--primary);
+  transition: background 0.2s, color 0.2s;
+}
+
+.dashboard-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* === BUTTONS === */
 .dashboard-new-btn {
-  background: #2196f3;
-  color: #fff;
+  background: linear-gradient(90deg, var(--primary) 60%, var(--primary-light) 100%);
+  color: var(--text-light);
   font-size: 1.13rem;
   padding: 0.7rem 2.2rem;
   border: none;
-  border-radius: 2rem;
-  font-weight: 600;
-  box-shadow: 0 2px 12px #2196f344;
+  border-radius: var(--radius-btn);
+  font-weight: 700;
+  box-shadow: var(--shadow-btn);
   cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s, color 0.2s;
   margin-top: 0.7rem;
+  outline: none;
+  letter-spacing: 0.01em;
+  margin-bottom: 0.5rem;
 }
 
 .dashboard-new-btn:hover,
 .dashboard-new-btn:focus {
-  background: #1976d2;
+  background: linear-gradient(90deg, #1565c0 60%, var(--primary-light) 100%);
   box-shadow: 0 4px 18px #1976d244;
   transform: translateY(-2px) scale(1.03);
-  outline: none;
+  color: #fffde7;
+  outline: 3px solid var(--primary-light);
+  outline-offset: 2px;
 }
 
-@media (max-width: 600px) {
+/* === SCROLLBAR === */
+.dashboard-table::-webkit-scrollbar {
+  height: 8px;
+  background: var(--secondary-bg);
+}
+.dashboard-table::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 6px;
+}
+.dashboard-table::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* === RESPONSIVE DESIGN === */
+@media (max-width: 700px) {
   .dashboard {
     padding: 1.1rem 0.2rem 1.5rem 0.2rem;
     border-radius: 0.8rem;
+    max-width: 99vw;
+  }
+  .dashboard-title {
+    font-size: 1.3rem;
   }
   .dashboard-table th,
   .dashboard-table td {
     padding: 0.5rem 0.3rem;
     font-size: 0.98rem;
   }
+  .dashboard-table {
+    font-size: 0.97rem;
+    border-radius: 0.7rem;
+  }
+  .dashboard-empty {
+    font-size: 1.01rem;
+    padding: 0.7rem 0.2rem;
+  }
+  .dashboard-new-btn {
+    font-size: 1rem;
+    padding: 0.5rem 1.2rem;
+    border-radius: 1.2rem;
+  }
+}
+
+/* === ACCESSIBILITY === */
+.dashboard-new-btn:focus-visible {
+  outline: 3px solid var(--primary-light);
+  outline-offset: 2px;
 }
