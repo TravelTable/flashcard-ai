@@ -3,7 +3,7 @@
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  background: #f7faff;
+  background: #f0f6ff;
   transition: background 0.3s;
   font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
   padding-bottom: 3rem;
@@ -25,26 +25,27 @@
 .flashcard-toolbar button {
   padding: 0.38rem 0.95rem;
   font-size: 1rem;
-  background: #1976d2;
+  background: #2196f3;
   color: #fff;
   border: none;
-  border-radius: 6px;
+  border-radius: 20px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
   transition: background 0.2s, color 0.2s;
   outline: none;
-  box-shadow: 0 1px 4px #0001;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
 }
 
 .flashcard-toolbar button:hover,
 .flashcard-toolbar button:focus {
-  background: #0d47a1;
+  background: #0b79d0;
   color: #fffde7;
 }
 
 .flashcard-viewer.dark .flashcard-toolbar button {
-  background: #263859;
+  background: #2e3b59;
   color: #e3eaff;
+  box-shadow: none;
 }
 
 .flashcard-viewer.dark .flashcard-toolbar button:hover,
@@ -55,22 +56,24 @@
 
 .flashcard-progress-bar {
   width: 420px;
-  height: 10px;
-  background: #e3eaff;
-  border-radius: 6px;
-  margin-bottom: 0.7rem;
+  height: 12px;
+  background: #dbe9ff;
+  border-radius: 30px;
+  margin-bottom: 1rem;
   overflow: hidden;
-  box-shadow: 0 1px 4px #0001;
+  box-shadow: inset 0 0 5px #a3c1ff;
 }
 
 .flashcard-viewer.dark .flashcard-progress-bar {
   background: #263859;
+  box-shadow: inset 0 0 5px #4a6bbd;
 }
 
 .flashcard-progress {
   height: 100%;
-  background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
+  background: linear-gradient(90deg, #2196f3 60%, #64b5f6 100%);
   transition: width 0.4s cubic-bezier(0.4, 2, 0.6, 1);
+  border-radius: 30px 0 0 30px;
 }
 
 .flashcard-viewer.dark .flashcard-progress {
@@ -85,25 +88,27 @@
 }
 
 .flashcard-controls button {
-  padding: 0.4rem 1.1rem;
-  font-size: 1rem;
-  background: #1976d2;
+  padding: 0.5rem 1.5rem;
+  font-size: 1.1rem;
+  background: #2196f3;
   color: #fff;
   border: none;
-  border-radius: 6px;
+  border-radius: 30px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
   transition: background 0.2s;
+  box-shadow: 0 6px 16px rgba(33, 150, 243, 0.3);
 }
 
 .flashcard-controls button:hover,
 .flashcard-controls button:focus {
-  background: #0d47a1;
+  background: #0b79d0;
 }
 
 .flashcard-viewer.dark .flashcard-controls button {
-  background: #263859;
+  background: #2e3b59;
   color: #e3eaff;
+  box-shadow: none;
 }
 
 .flashcard-viewer.dark .flashcard-controls button:hover,
@@ -115,24 +120,28 @@
 .flashcard {
   width: 420px;
   min-height: 140px;
-  background: #e3eaff;
-  border-radius: 14px;
-  box-shadow: 0 2px 16px #0002;
+  background: #dbe9ff;
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(33, 150, 243, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.18rem;
+  font-size: 1.3rem;
   cursor: pointer;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   position: relative;
   perspective: 1000px;
-  transition: box-shadow 0.2s, background 0.3s;
+  transition: box-shadow 0.3s, background 0.3s;
   outline: none;
   user-select: none;
+  padding: 1.5rem;
+  text-align: center;
+  line-height: 1.4;
+  color: #1565c0;
 }
 
 .flashcard:focus {
-  box-shadow: 0 0 0 3px #1976d2;
+  box-shadow: 0 0 0 4px #2196f3;
 }
 
 .flashcard-front,
@@ -145,8 +154,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
-  font-size: 1.18rem;
+  border-radius: 24px;
+  font-size: 1.3rem;
   transition: transform 0.4s cubic-bezier(0.4, 2, 0.6, 1);
   box-sizing: border-box;
   word-break: break-word;
@@ -154,13 +163,13 @@
 }
 
 .flashcard-front {
-  background: #e3eaff;
-  color: #1a237e;
+  background: #dbe9ff;
+  color: #1565c0;
   z-index: 2;
 }
 
 .flashcard-back {
-  background: #1976d2;
+  background: #2196f3;
   color: #fff;
   transform: rotateY(180deg);
   z-index: 3;
@@ -175,11 +184,13 @@
 }
 
 .flashcard-viewer.dark .flashcard {
-  background: #263859;
+  background: #2e3b59;
+  color: #ffe082;
+  box-shadow: 0 8px 24px rgba(255, 224, 130, 0.15);
 }
 
 .flashcard-viewer.dark .flashcard-front {
-  background: #263859;
+  background: #2e3b59;
   color: #ffe082;
 }
 
@@ -192,20 +203,21 @@
   display: flex;
   gap: 1.2rem;
   margin-bottom: 0.5rem;
+  justify-content: center;
 }
 
 .known-btn,
 .unknown-btn {
-  padding: 0.38rem 1.1rem;
-  font-size: 1rem;
+  padding: 0.5rem 1.5rem;
+  font-size: 1.1rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 30px;
   cursor: pointer;
-  font-weight: 500;
-  background: #e3eaff;
-  color: #1976d2;
+  font-weight: 600;
+  background: #dbe9ff;
+  color: #2196f3;
   transition: background 0.2s, color 0.2s;
-  box-shadow: 0 1px 4px #0001;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
 }
 
 .known-btn.active,
@@ -213,6 +225,7 @@
 .known-btn:focus {
   background: #43a047;
   color: #fff;
+  box-shadow: 0 6px 16px rgba(67, 160, 71, 0.4);
 }
 
 .unknown-btn.active,
@@ -220,16 +233,19 @@
 .unknown-btn:focus {
   background: #e53935;
   color: #fff;
+  box-shadow: 0 6px 16px rgba(229, 57, 53, 0.4);
 }
 
 .flashcard-viewer.dark .known-btn {
-  background: #263859;
+  background: #2e3b59;
   color: #ffe082;
+  box-shadow: none;
 }
 
 .flashcard-viewer.dark .unknown-btn {
-  background: #263859;
+  background: #2e3b59;
   color: #ffe082;
+  box-shadow: none;
 }
 
 .flashcard-viewer.dark .known-btn.active,
@@ -237,6 +253,7 @@
 .flashcard-viewer.dark .known-btn:focus {
   background: #388e3c;
   color: #fff;
+  box-shadow: 0 6px 16px rgba(56, 142, 60, 0.6);
 }
 
 .flashcard-viewer.dark .unknown-btn.active,
@@ -244,6 +261,7 @@
 .flashcard-viewer.dark .unknown-btn:focus {
   background: #b71c1c;
   color: #fff;
+  box-shadow: 0 6px 16px rgba(183, 28, 28, 0.6);
 }
 
 .flashcard-tip {
@@ -278,75 +296,91 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: #0008;
+  background: rgba(0, 0, 0, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  animation: fadeInModal 0.25s ease forwards;
 }
 
 .flashcard-modal-content {
   background: #fff;
   color: #222;
-  border-radius: 12px;
+  border-radius: 20px;
   padding: 2rem 2.2rem 1.5rem 2.2rem;
   min-width: 340px;
   max-width: 90vw;
-  box-shadow: 0 4px 32px #0003;
+  box-shadow: 0 8px 32px rgba(33, 150, 243, 0.25);
   position: relative;
-  font-size: 1.08rem;
+  font-size: 1.1rem;
+  user-select: text;
 }
 
 .flashcard-modal-content h3 {
   margin-top: 0;
   margin-bottom: 1rem;
-  font-size: 1.3rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1565c0;
 }
 
 .flashcard-modal-content textarea {
   font-family: 'Fira Mono', 'Consolas', monospace;
   font-size: 1rem;
-  border-radius: 6px;
-  border: 1px solid #b0bec5;
+  border-radius: 12px;
+  border: 1.5px solid #a3c1ff;
   padding: 0.7rem;
   resize: vertical;
-  background: #f7faff;
+  background: #f0f6ff;
   color: #222;
+  width: 100%;
+  min-height: 120px;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+.flashcard-modal-content textarea:focus {
+  border-color: #2196f3;
+  outline: none;
 }
 
 .flashcard-modal-content button {
   margin-right: 0.7rem;
   margin-top: 0.5rem;
-  padding: 0.38rem 1.1rem;
+  padding: 0.5rem 1.5rem;
   font-size: 1rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 30px;
   cursor: pointer;
-  font-weight: 500;
-  background: #1976d2;
+  font-weight: 600;
+  background: #2196f3;
   color: #fff;
   transition: background 0.2s;
+  box-shadow: 0 6px 16px rgba(33, 150, 243, 0.3);
 }
 
 .flashcard-modal-content button:hover,
 .flashcard-modal-content button:focus {
-  background: #0d47a1;
+  background: #0b79d0;
 }
 
 .flashcard-viewer.dark .flashcard-modal-content {
-  background: #263859;
+  background: #2e3b59;
   color: #ffe082;
+  box-shadow: 0 8px 32px rgba(255, 224, 130, 0.4);
 }
 
 .flashcard-viewer.dark .flashcard-modal-content textarea {
   background: #1a2238;
   color: #ffe082;
-  border: 1px solid #37474f;
+  border: 1.5px solid #4a6bbd;
 }
 
 .flashcard-viewer.dark .flashcard-modal-content button {
   background: #ffe082;
-  color: #263859;
+  color: #2e3b59;
+  box-shadow: 0 6px 16px rgba(255, 224, 130, 0.4);
 }
 
 .flashcard-viewer.dark .flashcard-modal-content button:hover,
@@ -379,7 +413,7 @@
 
 /* Animations for modal */
 .flashcard-modal {
-  animation: fadeInModal 0.2s;
+  animation: fadeInModal 0.25s ease forwards;
 }
 @keyframes fadeInModal {
   from { opacity: 0; }
