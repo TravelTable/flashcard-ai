@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./LessonQuizSession.css";
 import FlashcardViewer from "./FlashcardViewer";
 
-// Helper to shuffle an array (for quiz options)
+// -------------------- Helpers --------------------
 function shuffle(array) {
   const arr = array.slice();
   for (let i = arr.length - 1; i > 0; i--) {
@@ -12,9 +12,8 @@ function shuffle(array) {
   return arr;
 }
 
-// Cute mascot SVG (small, for reactions)
+// -------------------- Mascot --------------------
 function MascotFace({ mood = "neutral" }) {
-  // mood: "happy", "neutral", "sad"
   let mouth, color;
   if (mood === "happy") {
     mouth = <path d="M60 80 Q70 90 80 80" stroke="#2196f3" strokeWidth="3" fill="none" />;
@@ -40,6 +39,7 @@ function MascotFace({ mood = "neutral" }) {
   );
 }
 
+// -------------------- XP Bar --------------------
 function XPBar({ progress, total }) {
   const percent = Math.round((progress / total) * 100);
   return (
@@ -52,7 +52,9 @@ function XPBar({ progress, total }) {
   );
 }
 
+// -------------------- Main Component --------------------
 function LessonQuizSession({ flashcards, quizzes, onComplete }) {
+  // ----- State -----
   const [step, setStep] = useState(0); // 0: flashcards, 1: quizzes, 2: complete
   const [quizIndex, setQuizIndex] = useState(0);
   const [xp, setXp] = useState(0);
@@ -63,7 +65,7 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
   const [quizInput, setQuizInput] = useState("");
   const [quizSubmitted, setQuizSubmitted] = useState(false);
 
-  // Track flashcard session stats from FlashcardViewer
+  // Flashcard session stats
   const [flashcardSessionStats, setFlashcardSessionStats] = useState({
     xp: 0,
     completed: false,
@@ -75,13 +77,13 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
     score: "",
   });
 
-  // Reset input state when moving to a new quiz
+  // ----- Effects -----
   useEffect(() => {
     setQuizInput("");
     setQuizSubmitted(false);
   }, [quizIndex, step]);
 
-  // --- Quiz Logic ---
+  // ----- Quiz Logic -----
   const handleQuizAnswer = (isCorrect) => {
     setQuizResults((prev) => [
       ...prev,
@@ -104,9 +106,11 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
     }, 900);
   };
 
-  // --- Render Quiz Card ---
+  // ----- Render Quiz Card -----
   const renderQuizCard = () => {
     const q = quizzes[quizIndex];
+    if (!q) return null;
+
     if (q.type === "mcq") {
       const options = shuffle([q.answer, ...q.options.filter(opt => opt !== q.answer)]).slice(0, 4);
       return (
@@ -129,6 +133,7 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
         </div>
       );
     }
+
     if (q.type === "truefalse") {
       return (
         <div className="lesson-card quiz-card">
@@ -155,6 +160,7 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
         </div>
       );
     }
+
     if (q.type === "fillblank") {
       const handleSubmit = () => {
         const isCorrect = quizInput.trim().toLowerCase() === q.answer.trim().toLowerCase();
@@ -184,9 +190,9 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
         </div>
       );
     }
+
     if (q.type === "short") {
       const handleSubmit = () => {
-        // Accept if answer is similar (case-insensitive substring match)
         const isCorrect =
           quizInput.trim().toLowerCase().includes(q.answer.trim().toLowerCase()) ||
           q.answer.trim().toLowerCase().includes(quizInput.trim().toLowerCase());
@@ -216,14 +222,14 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
         </div>
       );
     }
+
     return null;
   };
 
-  // --- Render Completion Screen ---
+  // ----- Render Completion Screen -----
   const renderComplete = () => {
     const correct = quizResults.filter(r => r.correct).length;
     const total = quizResults.length;
-    // Merge flashcard stats and quiz stats for session summary
     const totalXp = xp + flashcardSessionStats.xp;
     const totalScore = `${correct} / ${total}`;
     const totalStreak = Math.max(maxStreak, flashcardSessionStats.maxStreak);
@@ -252,20 +258,22 @@ function LessonQuizSession({ flashcards, quizzes, onComplete }) {
     );
   };
 
-  // --- FlashcardViewer Completion Handler ---
+  // ----- FlashcardViewer Completion Handler -----
   function handleFlashcardSessionComplete(stats) {
-    // stats: { xp, completed, knownCount, unknownCount, timeSpent, streak, maxStreak, score }
     setFlashcardSessionStats(stats);
     setXp((prev) => prev + stats.xp);
     setStep(1); // Move to quizzes
   }
 
-  // --- Main Render ---
+  // ----- Main Render -----
   return (
     <div className="lesson-quiz-session">
       <div className="lesson-header">
         <MascotFace mood={mascotMood} />
-        <XPBar progress={xp + flashcardSessionStats.xp} total={flashcards.length * 5 + quizzes.length * 10} />
+        <XPBar
+          progress={xp + flashcardSessionStats.xp}
+          total={flashcards.length * 5 + quizzes.length * 10}
+        />
       </div>
       {step === 0 && (
         <div>
