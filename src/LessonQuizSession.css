@@ -1,5 +1,3 @@
-/* LessonQuizSession.css & FlashcardViewer.css - Unified, Modern, Visually Seamless, Advanced Animations, Accessibility, and Responsive Design */
-
 /* === GLOBAL RESETS & VARIABLES === */
 :root {
   --primary: #1976d2;
@@ -36,12 +34,12 @@
 
 /* === UNIVERSAL STYLES === */
 body {
-  font-family: var(--font-main);
   background: var(--primary-bg);
   color: var(--text-main);
+  font-family: var(--font-main);
   margin: 0;
-  padding: 0;
   min-height: 100vh;
+  padding: 0;
   transition: background 0.3s;
 }
 
@@ -51,21 +49,20 @@ body {
   box-sizing: border-box;
 }
 
-/* === SHARED CONTAINERS === */
+/* === MAIN CONTAINERS === */
 .lesson-quiz-session,
 .flashcard-viewer {
-  max-width: 540px;
-  margin: 0 auto;
-  padding: 2.5rem 1.2rem 2.5rem 1.2rem;
+  align-items: center;
   background: linear-gradient(120deg, var(--primary-bg) 60%, var(--secondary-bg) 100%);
   border-radius: var(--radius-main);
   box-shadow: var(--shadow-main);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin-top: 3rem;
-  transition: background var(--transition-main);
+  margin: 3rem auto 0 auto;
+  max-width: 540px;
   min-width: 0;
+  padding: 2.5rem 1.2rem;
+  transition: background var(--transition-main);
   width: 100%;
 }
 
@@ -76,42 +73,42 @@ body {
 
 /* === HEADER & XP BAR === */
 .lesson-header {
-  width: 100%;
-  display: flex;
   align-items: center;
+  display: flex;
   gap: 1.3rem;
-  margin-bottom: 1.2rem;
   justify-content: center;
+  margin-bottom: 1.2rem;
+  width: 100%;
 }
 
 .lesson-header svg {
-  width: 58px;
-  height: 58px;
-  margin-right: 0.2rem;
   background: #e3f0ff;
   border-radius: 50%;
   box-shadow: 0 2px 8px #2196f322;
+  height: 58px;
+  margin-right: 0.2rem;
+  width: 58px;
 }
 
 .xp-bar {
-  flex: 1;
   background: var(--secondary-bg);
   border-radius: 1.2rem;
-  height: 1.3rem;
-  position: relative;
-  overflow: hidden;
-  min-width: 160px;
-  max-width: 240px;
-  margin-left: 0.2rem;
   box-shadow: 0 1px 4px #0001;
+  flex: 1;
+  height: 1.3rem;
+  margin-left: 0.2rem;
+  max-width: 240px;
+  min-width: 160px;
+  overflow: hidden;
+  position: relative;
 }
 
 .xp-bar-fill {
-  background: linear-gradient(90deg, var(--primary) 60%, var(--primary-light) 100%);
-  height: 100%;
-  border-radius: 1.2rem;
-  transition: width 0.5s cubic-bezier(0.4, 2, 0.6, 1);
   animation: xpBarGrow 1.2s cubic-bezier(0.4, 2, 0.6, 1);
+  background: linear-gradient(90deg, var(--primary) 60%, var(--primary-light) 100%);
+  border-radius: 1.2rem;
+  height: 100%;
+  transition: width 0.5s cubic-bezier(0.4, 2, 0.6, 1);
 }
 
 @keyframes xpBarGrow {
@@ -120,32 +117,35 @@ body {
 }
 
 .xp-bar-text {
-  position: absolute;
-  left: 0; right: 0; top: 0; bottom: 0;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 1.01rem;
   color: var(--primary);
+  display: flex;
+  font-size: 1.01rem;
   font-weight: 600;
+  justify-content: center;
+  left: 0;
   letter-spacing: 0.01em;
-  text-shadow: 0 1px 2px #fff8;
   pointer-events: none;
+  position: absolute;
+  right: 0;
+  text-shadow: 0 1px 2px #fff8;
+  top: 0;
+  bottom: 0;
 }
 
 /* === PROGRESS === */
 .lesson-progress,
 .flashcard-status {
   color: var(--primary);
+  display: flex;
+  flex-wrap: wrap;
   font-size: 1.13rem;
   font-weight: 600;
-  margin-bottom: 0.8rem;
-  text-align: center;
-  letter-spacing: 0.01em;
-  display: flex;
   gap: 1.5rem;
   justify-content: center;
-  flex-wrap: wrap;
+  letter-spacing: 0.01em;
+  margin-bottom: 0.8rem;
+  text-align: center;
 }
 
 .flashcard-viewer.dark .flashcard-status {
@@ -155,25 +155,25 @@ body {
 /* === CARD STYLES === */
 .lesson-card,
 .flashcard {
-  width: 100%;
-  min-height: 170px;
+  align-items: center;
   background: linear-gradient(120deg, var(--secondary-bg) 60%, var(--primary-bg) 100%);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  margin-bottom: 1.2rem;
-  position: relative;
-  overflow: hidden;
   cursor: pointer;
-  transition: box-shadow 0.2s, transform 0.12s, background var(--transition-main);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  perspective: 900px;
-  padding: 1.3rem 1.1rem;
   font-size: 1.15rem;
-  user-select: none;
+  justify-content: center;
+  margin-bottom: 1.2rem;
+  min-height: 170px;
   outline: none;
+  overflow: hidden;
+  padding: 1.3rem 1.1rem;
+  perspective: 900px;
+  position: relative;
+  transition: box-shadow 0.2s, transform 0.12s, background var(--transition-main);
+  user-select: none;
+  width: 100%;
   will-change: transform;
 }
 
@@ -209,27 +209,29 @@ body {
 .card-face,
 .flashcard-front,
 .flashcard-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  left: 0; top: 0;
+  align-items: center;
+  backface-visibility: hidden;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  height: 100%;
   justify-content: center;
-  backface-visibility: hidden;
-  transition: opacity 0.4s, transform 0.5s;
-  padding: 1.2rem 1.1rem;
-  box-sizing: border-box;
-  word-break: break-word;
+  left: 0;
   min-height: 140px;
+  opacity: 1;
+  padding: 1.2rem 1.1rem;
+  position: absolute;
+  top: 0;
+  transition: opacity 0.4s, transform 0.5s;
+  width: 100%;
+  word-break: break-word;
 }
 
 .card-front,
 .flashcard-front {
-  z-index: 2;
   opacity: 1;
   transform: rotateY(0deg);
+  z-index: 2;
 }
 
 .card-front.hide,
@@ -240,9 +242,9 @@ body {
 
 .card-back,
 .flashcard-back {
-  z-index: 3;
   opacity: 0;
   transform: rotateY(-180deg);
+  z-index: 3;
 }
 
 .card-back.show,
@@ -253,23 +255,23 @@ body {
 
 /* === CARD LABELS & CONTENT === */
 .card-label {
-  font-size: 0.97rem;
   color: var(--primary-light);
+  font-size: 0.97rem;
   font-weight: 700;
-  margin-bottom: 0.4rem;
   letter-spacing: 0.01em;
+  margin-bottom: 0.4rem;
   text-shadow: 0 1px 2px #fff8;
 }
 
 .card-q, .card-a,
 .flashcard-front, .flashcard-back {
-  font-size: 1.22rem;
   color: var(--primary);
+  font-size: 1.22rem;
   font-weight: 600;
+  line-height: 1.4;
   margin-bottom: 0.7rem;
   text-align: center;
   word-break: break-word;
-  line-height: 1.4;
 }
 
 .card-a {
@@ -278,12 +280,12 @@ body {
 
 .card-tip,
 .flashcard-tip {
-  font-size: 0.99rem;
   color: var(--text-muted);
+  font-size: 0.99rem;
   margin-top: 0.4rem;
-  text-shadow: 0 1px 2px #fff8;
-  text-align: center;
   max-width: 420px;
+  text-align: center;
+  text-shadow: 0 1px 2px #fff8;
 }
 
 .flashcard-viewer.dark .flashcard-tip {
@@ -292,73 +294,74 @@ body {
 
 /* === QUIZ CARD & OPTIONS === */
 .quiz-card {
+  background: linear-gradient(120deg, var(--secondary-bg) 60%, var(--primary-bg) 100%);
   cursor: default;
   min-height: 180px;
-  background: linear-gradient(120deg, var(--secondary-bg) 60%, var(--primary-bg) 100%);
 }
 
 .quiz-options {
+  align-items: center;
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
-  width: 100%;
-  align-items: center;
   margin-top: 0.5rem;
+  width: 100%;
 }
 
 .quiz-option-btn {
   background: linear-gradient(90deg, var(--primary) 60%, var(--primary-light) 100%);
-  color: var(--text-light);
-  font-size: 1.09rem;
-  padding: 0.65rem 1.7rem;
   border: none;
   border-radius: 1.7rem;
-  font-weight: 700;
   box-shadow: 0 2px 8px #2196f344;
+  color: var(--text-light);
   cursor: pointer;
-  transition: background 0.18s, box-shadow 0.18s, transform 0.09s;
+  font-size: 1.09rem;
+  font-weight: 700;
   margin-bottom: 0.1rem;
   outline: none;
+  padding: 0.65rem 1.7rem;
+  transition: background 0.18s, box-shadow 0.18s, transform 0.09s;
 }
 
 .quiz-option-btn[aria-pressed="true"],
 .quiz-option-btn.selected {
   background: var(--success);
-  color: var(--text-light);
   box-shadow: 0 4px 16px #43a04744;
+  color: var(--text-light);
 }
 
 .quiz-option-btn.incorrect {
   background: var(--danger);
-  color: var(--text-light);
   box-shadow: 0 4px 16px #e5393544;
+  color: var(--text-light);
 }
 
 .quiz-option-btn:hover,
 .quiz-option-btn:focus {
   background: linear-gradient(90deg, #1565c0 60%, var(--primary-light) 100%);
   box-shadow: 0 4px 16px #1976d244;
+  color: #fffde7;
   transform: translateY(-2px) scale(1.04);
 }
 
 /* === INPUTS === */
 .quiz-input {
-  width: 85%;
-  padding: 0.55rem 1.1rem;
-  font-size: 1.09rem;
+  background: #f5faff;
   border: 1.5px solid #b3d2f9;
   border-radius: 1.3rem;
-  background: #f5faff;
   color: var(--primary);
+  font-size: 1.09rem;
+  font-weight: 600;
   margin-bottom: 0.7rem;
   margin-top: 0.3rem;
-  font-weight: 600;
+  padding: 0.55rem 1.1rem;
   transition: border 0.2s;
+  width: 85%;
 }
 
 .quiz-input:focus {
-  border: 2px solid var(--primary-light);
   background: var(--secondary-bg);
+  border: 2px solid var(--primary-light);
 }
 
 /* === BUTTONS === */
@@ -367,28 +370,28 @@ body {
 .flashcard-controls button,
 .flashcard-modal-content button {
   background: linear-gradient(90deg, var(--primary) 60%, var(--primary-light) 100%);
-  color: var(--text-light);
-  font-size: 1.15rem;
-  padding: 0.75rem 2.3rem;
   border: none;
   border-radius: var(--radius-btn);
-  font-weight: 700;
   box-shadow: var(--shadow-btn);
+  color: var(--text-light);
   cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.1s, color 0.2s;
+  font-size: 1.15rem;
+  font-weight: 700;
   margin-top: 0.7rem;
   outline: none;
+  padding: 0.75rem 2.3rem;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s, color 0.2s;
 }
 
 .flashcard-toolbar button,
 .flashcard-controls button,
 .flashcard-modal-content button {
-  font-size: 1rem;
-  padding: 0.38rem 1.1rem;
   border-radius: var(--radius-small);
-  margin-top: 0;
-  margin-right: 0.7rem;
   box-shadow: 0 1px 4px #0001;
+  font-size: 1rem;
+  margin-right: 0.7rem;
+  margin-top: 0;
+  padding: 0.38rem 1.1rem;
 }
 
 .lesson-next-btn:hover,
@@ -403,8 +406,8 @@ body {
 .flashcard-modal-content button:focus {
   background: linear-gradient(90deg, #1565c0 60%, var(--primary-light) 100%);
   box-shadow: 0 4px 18px #1976d244;
-  transform: translateY(-2px) scale(1.04);
   color: #fffde7;
+  transform: translateY(-2px) scale(1.04);
 }
 
 .flashcard-viewer.dark .flashcard-toolbar button,
@@ -433,16 +436,16 @@ body {
 
 .known-btn,
 .unknown-btn {
-  padding: 0.38rem 1.1rem;
-  font-size: 1rem;
+  background: var(--secondary-bg);
   border: none;
   border-radius: var(--radius-small);
-  cursor: pointer;
-  font-weight: 600;
-  background: var(--secondary-bg);
-  color: var(--primary);
-  transition: background 0.2s, color 0.2s;
   box-shadow: 0 1px 4px #0001;
+  color: var(--primary);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.38rem 1.1rem;
+  transition: background 0.2s, color 0.2s;
 }
 
 .known-btn.active,
@@ -481,44 +484,46 @@ body {
 
 /* === MODAL === */
 .flashcard-modal {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  align-items: center;
+  animation: fadeInModal 0.2s;
   background: var(--modal-bg);
   display: flex;
-  align-items: center;
+  height: 100vh;
   justify-content: center;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100vw;
   z-index: 1000;
-  animation: fadeInModal 0.2s;
 }
 
 .flashcard-modal-content {
   background: #fff;
-  color: #222;
   border-radius: var(--modal-radius);
-  padding: 2rem 2.2rem 1.5rem 2.2rem;
-  min-width: 340px;
-  max-width: 90vw;
   box-shadow: var(--modal-shadow);
-  position: relative;
+  color: #222;
   font-size: 1.09rem;
+  max-width: 90vw;
+  min-width: 340px;
+  padding: 2rem 2.2rem 1.5rem 2.2rem;
+  position: relative;
 }
 
 .flashcard-modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 1rem;
   font-size: 1.3rem;
+  margin-bottom: 1rem;
+  margin-top: 0;
 }
 
 .flashcard-modal-content textarea {
+  background: var(--primary-bg);
+  border: 1px solid #b0bec5;
+  border-radius: var(--radius-small);
+  color: #222;
   font-family: 'Fira Mono', 'Consolas', monospace;
   font-size: 1rem;
-  border-radius: var(--radius-small);
-  border: 1px solid #b0bec5;
   padding: 0.7rem;
   resize: vertical;
-  background: var(--primary-bg);
-  color: #222;
 }
 
 .flashcard-viewer.dark .flashcard-modal-content {
@@ -528,8 +533,8 @@ body {
 
 .flashcard-viewer.dark .flashcard-modal-content textarea {
   background: var(--dark-card-alt);
-  color: var(--dark-accent);
   border: 1px solid var(--dark-border);
+  color: var(--dark-accent);
 }
 
 .flashcard-viewer.dark .flashcard-modal-content button {
@@ -545,12 +550,12 @@ body {
 
 /* === COMPLETION & SUMMARY === */
 .lesson-complete {
+  align-items: center;
+  animation: fadeInUp 0.7s cubic-bezier(0.4, 2, 0.6, 1);
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
   padding-top: 1.5rem;
-  animation: fadeInUp 0.7s cubic-bezier(0.4, 2, 0.6, 1);
 }
 
 .lesson-complete h2 {
@@ -561,10 +566,10 @@ body {
 }
 
 .xp-summary, .streak-summary {
-  font-size: 1.17rem;
   color: var(--primary);
-  margin-bottom: 0.7rem;
+  font-size: 1.17rem;
   font-weight: 600;
+  margin-bottom: 0.7rem;
 }
 
 .streak-summary {
@@ -575,13 +580,13 @@ body {
 
 /* === PROGRESS BAR === */
 .flashcard-progress-bar {
-  width: 420px;
-  height: 10px;
   background: var(--secondary-bg);
   border-radius: var(--radius-small);
+  box-shadow: 0 1px 4px #0001;
+  height: 10px;
   margin-bottom: 0.7rem;
   overflow: hidden;
-  box-shadow: 0 1px 4px #0001;
+  width: 420px;
 }
 
 .flashcard-viewer.dark .flashcard-progress-bar {
@@ -589,8 +594,8 @@ body {
 }
 
 .flashcard-progress {
-  height: 100%;
   background: linear-gradient(90deg, var(--primary) 60%, var(--primary-light) 100%);
+  height: 100%;
   transition: width 0.4s cubic-bezier(0.4, 2, 0.6, 1);
 }
 
@@ -602,21 +607,21 @@ body {
 @media (max-width: 700px) {
   .lesson-quiz-session,
   .flashcard-viewer {
-    padding: 1.1rem 0.2rem 1.5rem 0.2rem;
     border-radius: 1.1rem;
     max-width: 99vw;
+    padding: 1.1rem 0.2rem 1.5rem 0.2rem;
   }
   .lesson-card,
   .flashcard {
-    padding: 0.7rem 0.4rem;
-    min-height: 120px;
-    width: 98vw;
     max-width: 99vw;
+    min-height: 120px;
+    padding: 0.7rem 0.4rem;
+    width: 98vw;
   }
   .xp-bar,
   .flashcard-progress-bar {
-    min-width: 100px;
     max-width: 99vw;
+    min-width: 100px;
     width: 98vw;
   }
   .flashcard-modal-content {
@@ -625,8 +630,8 @@ body {
   }
   .flashcard-status {
     flex-direction: column;
-    gap: 0.5rem;
     font-size: 0.98rem;
+    gap: 0.5rem;
   }
   .flashcard-tip {
     font-size: 0.95rem;
@@ -655,8 +660,8 @@ button:focus-visible,
 
 /* === SCROLLBAR STYLES === */
 ::-webkit-scrollbar {
-  width: 10px;
   background: var(--secondary-bg);
+  width: 10px;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--primary-light);
