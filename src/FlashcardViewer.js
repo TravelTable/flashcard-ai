@@ -1,9 +1,24 @@
-import React, { useState, useEffect } from "react";
-import "./LessonQuizSession.css";
-import FlashcardViewer from "./FlashcardViewer";
+import React, { useState, useEffect, useRef } from "react";
+import "./FlashcardViewer.css";
 
-// -------------------- Helpers --------------------
-function shuffle(array) {
+/**
+ * Advanced FlashcardViewer
+ * Features:
+ * - Keyboard navigation (arrow keys, space to flip)
+ * - Progress tracking (per card, session stats)
+ * - Mark cards as "known" or "unknown"
+ * - Shuffle and reset deck
+ * - Timer per card and total session
+ * - Accessibility improvements
+ * - Animations for transitions
+ * - Responsive design
+ * - Export/Import progress (JSON)
+ * - Dark mode toggle
+ * - Audio read-aloud (TTS)
+ */
+
+function shuffleArray(array) {
+  // Fisher-Yates shuffle
   const arr = array.slice();
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -12,315 +27,472 @@ function shuffle(array) {
   return arr;
 }
 
-// -------------------- Mascot --------------------
-function MascotFace({ mood = "neutral" }) {
-  let mouth, color;
-  if (mood === "happy") {
-    mouth = <path d="M60 80 Q70 90 80 80" stroke="#2196f3" strokeWidth="3" fill="none" />;
-    color = "#2196f3";
-  } else if (mood === "sad") {
-    mouth = <path d="M60 85 Q70 75 80 85" stroke="#1976d2" strokeWidth="3" fill="none" />;
-    color = "#1976d2";
-  } else {
-    mouth = <rect x="62" y="80" width="16" height="4" rx="2" fill="#90caf9" />;
-    color = "#2196f3";
-  }
-  return (
-    <svg width="58" height="58" viewBox="0 0 140 140" style={{ display: "block" }}>
-      <ellipse cx="70" cy="70" rx="55" ry="55" fill="#e3f0ff" />
-      <ellipse cx="70" cy="70" rx="38" ry="32" fill={color} />
-      <ellipse cx="70" cy="70" rx="32" ry="26" fill="#fff" />
-      <ellipse cx="55" cy="72" rx="6" ry="8" fill={color} />
-      <ellipse cx="85" cy="72" rx="6" ry="8" fill={color} />
-      <ellipse cx="55" cy="74" rx="2.2" ry="3" fill="#fff" />
-      <ellipse cx="85" cy="74" rx="2.2" ry="3" fill="#fff" />
-      {mouth}
-    </svg>
-  );
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, "0");
+  const s = (seconds % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
 }
 
-// -------------------- XP Bar --------------------
-function XPBar({ progress, total }) {
-  const percent = Math.round((progress / total) * 100);
-  return (
-    <div className="xp-bar">
-      <div className="xp-bar-fill" style={{ width: `${percent}%` }} />
-      <span className="xp-bar-text">
-        {progress} / {total} XP
-      </span>
-    </div>
-  );
-}
+const LOCAL_STORAGE_KEY = "flashcardViewerProgress_v2";
 
-// -------------------- Main Component --------------------
-function LessonQuizSession({ flashcards, quizzes, onComplete }) {
-  // ----- State -----
-  const [step, setStep] = useState(0); // 0: flashcards, 1: quizzes, 2: complete
-  const [quizIndex, setQuizIndex] = useState(0);
-  const [xp, setXp] = useState(0);
-  const [streak, setStreak] = useState(0);
-  const [maxStreak, setMaxStreak] = useState(0);
-  const [mascotMood, setMascotMood] = useState("neutral");
-  const [quizResults, setQuizResults] = useState([]);
-  const [quizInput, setQuizInput] = useState("");
-  const [quizSubmitted, setQuizSubmitted] = useState(false);
-
-  // Flashcard session stats
-  const [flashcardSessionStats, setFlashcardSessionStats] = useState({
-    xp: 0,
-    completed: false,
-    knownCount: 0,
-    unknownCount: 0,
-    timeSpent: 0,
-    streak: 0,
-    maxStreak: 0,
-    score: "",
+function FlashcardViewer({ flashcards }) {
+  // State
+  const [deck, setDeck] = useState([]);
+  const [current, setCurrent] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [known, setKnown] = useState({});
+  const [sessionStats, setSessionStats] = useState({
+    correct: 0,
+    incorrect: 0,
+    viewed: 0,
+    startTime: null,
+    totalTime: 0,
+    perCardTime: {},
   });
+  const [shuffle, setShuffle] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [ttsEnabled, setTtsEnabled] = useState(false);
+  const [importExportOpen, setImportExportOpen] = useState(false);
+  const [importExportData, setImportExportData] = useState("");
+  const [showStats, setShowStats] = useState(false);
 
-  // ----- Effects -----
+  const timerRef = useRef(null);
+  const cardStartTimeRef = useRef(Date.now());
+  const ttsUtteranceRef = useRef(null);
+
+  // Load deck and progress
   useEffect(() => {
-    setQuizInput("");
-    setQuizSubmitted(false);
-  }, [quizIndex, step]);
-
-  // ----- Quiz Logic -----
-  const handleQuizAnswer = (isCorrect) => {
-    setQuizResults((prev) => [
-      ...prev,
-      { index: quizIndex, correct: isCorrect }
-    ]);
-    setXp((prev) => prev + (isCorrect ? 10 : 0));
-    setStreak((prev) => {
-      const newStreak = isCorrect ? prev + 1 : 0;
-      setMaxStreak((max) => (newStreak > max ? newStreak : max));
-      return newStreak;
+    let initialDeck = flashcards ? flashcards.slice() : [];
+    let saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (
+          parsed.deck &&
+          parsed.deck.length === initialDeck.length &&
+          parsed.deck.every((c, i) => c.question === initialDeck[i].question)
+        ) {
+          setDeck(parsed.deck);
+          setKnown(parsed.known || {});
+          setSessionStats(parsed.sessionStats || sessionStats);
+          setCurrent(parsed.current || 0);
+          setShuffle(parsed.shuffle || false);
+          setDarkMode(parsed.darkMode || false);
+          return;
+        }
+      } catch (e) {}
+    }
+    setDeck(initialDeck);
+    setKnown({});
+    setSessionStats({
+      correct: 0,
+      incorrect: 0,
+      viewed: 0,
+      startTime: Date.now(),
+      totalTime: 0,
+      perCardTime: {},
     });
-    setMascotMood(isCorrect ? "happy" : "sad");
-    setTimeout(() => {
-      setMascotMood("neutral");
-      if (quizIndex < quizzes.length - 1) {
-        setQuizIndex(quizIndex + 1);
-      } else {
-        setStep(2); // Complete
+    setCurrent(0);
+    setShuffle(false);
+    setDarkMode(false);
+  }, [flashcards]);
+
+  // Save progress
+  useEffect(() => {
+    if (deck.length === 0) return;
+    localStorage.setItem(
+      LOCAL_STORAGE_KEY,
+      JSON.stringify({
+        deck,
+        current,
+        known,
+        sessionStats,
+        shuffle,
+        darkMode,
+      })
+    );
+  }, [deck, current, known, sessionStats, shuffle, darkMode]);
+
+  // Timer logic
+  useEffect(() => {
+    if (deck.length === 0) return;
+    if (!sessionStats.startTime) {
+      setSessionStats((s) => ({
+        ...s,
+        startTime: Date.now(),
+      }));
+    }
+    timerRef.current = setInterval(() => {
+      setSessionStats((s) => ({
+        ...s,
+        totalTime: Math.floor((Date.now() - s.startTime) / 1000),
+      }));
+    }, 1000);
+    return () => clearInterval(timerRef.current);
+    // eslint-disable-next-line
+  }, [deck.length, sessionStats.startTime]);
+
+  // Per-card timer
+  useEffect(() => {
+    cardStartTimeRef.current = Date.now();
+    // eslint-disable-next-line
+  }, [current]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    function handleKey(e) {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+      if (e.key === "ArrowLeft") {
+        handlePrev();
+      } else if (e.key === "ArrowRight") {
+        handleNext();
+      } else if (e.key === " " || e.key === "Enter") {
+        handleFlip();
+      } else if (e.key === "k" || e.key === "K") {
+        markKnown(true);
+      } else if (e.key === "u" || e.key === "U") {
+        markKnown(false);
       }
-    }, 900);
-  };
-
-  // ----- Render Quiz Card -----
-  const renderQuizCard = () => {
-    const q = quizzes[quizIndex];
-    if (!q) return null;
-
-    if (q.type === "mcq") {
-      const options = shuffle([q.answer, ...q.options.filter(opt => opt !== q.answer)]).slice(0, 4);
-      return (
-        <div className="lesson-card quiz-card">
-          <span className="card-label">Multiple Choice</span>
-          <div className="card-q">{q.question}</div>
-          <div className="quiz-options">
-            {options.map((opt, i) => (
-              <button
-                key={i}
-                className="quiz-option-btn"
-                onClick={() => handleQuizAnswer(opt === q.answer)}
-                tabIndex={0}
-                disabled={quizSubmitted}
-              >
-                {opt}
-              </button>
-            ))}
-          </div>
-        </div>
-      );
     }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+    // eslint-disable-next-line
+  }, [current, flipped, deck, known]);
 
-    if (q.type === "truefalse") {
-      return (
-        <div className="lesson-card quiz-card">
-          <span className="card-label">True/False</span>
-          <div className="card-q">{q.question}</div>
-          <div className="quiz-options">
-            <button
-              className="quiz-option-btn"
-              onClick={() => handleQuizAnswer(q.answer === "True")}
-              tabIndex={0}
-              disabled={quizSubmitted}
-            >
-              True
-            </button>
-            <button
-              className="quiz-option-btn"
-              onClick={() => handleQuizAnswer(q.answer === "False")}
-              tabIndex={0}
-              disabled={quizSubmitted}
-            >
-              False
-            </button>
-          </div>
-        </div>
-      );
+  // TTS
+  useEffect(() => {
+    if (!ttsEnabled) return;
+    if (!window.speechSynthesis) return;
+    if (ttsUtteranceRef.current) {
+      window.speechSynthesis.cancel();
     }
+    const utter = new window.SpeechSynthesisUtterance(
+      flipped
+        ? deck[current]?.answer || ""
+        : deck[current]?.question || ""
+    );
+    utter.rate = 1;
+    utter.pitch = 1;
+    utter.lang = "en-US";
+    ttsUtteranceRef.current = utter;
+    window.speechSynthesis.speak(utter);
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+    // eslint-disable-next-line
+  }, [ttsEnabled, current, flipped, deck]);
 
-    if (q.type === "fillblank") {
-      const handleSubmit = () => {
-        const isCorrect = quizInput.trim().toLowerCase() === q.answer.trim().toLowerCase();
-        setQuizSubmitted(true);
-        handleQuizAnswer(isCorrect);
-      };
-
-      return (
-        <div className="lesson-card quiz-card">
-          <span className="card-label">Fill in the Blank</span>
-          <div className="card-q">{q.question}</div>
-          <input
-            className="quiz-input"
-            value={quizInput}
-            onChange={(e) => setQuizInput(e.target.value)}
-            disabled={quizSubmitted}
-            placeholder="Type your answer"
-            tabIndex={0}
-          />
-          <button
-            className="quiz-option-btn"
-            onClick={handleSubmit}
-            disabled={quizSubmitted || !quizInput.trim()}
-          >
-            Submit
-          </button>
-        </div>
-      );
-    }
-
-    if (q.type === "short") {
-      const handleSubmit = () => {
-        const isCorrect =
-          quizInput.trim().toLowerCase().includes(q.answer.trim().toLowerCase()) ||
-          q.answer.trim().toLowerCase().includes(quizInput.trim().toLowerCase());
-        setQuizSubmitted(true);
-        handleQuizAnswer(isCorrect);
-      };
-
-      return (
-        <div className="lesson-card quiz-card">
-          <span className="card-label">Short Answer</span>
-          <div className="card-q">{q.question}</div>
-          <input
-            className="quiz-input"
-            value={quizInput}
-            onChange={(e) => setQuizInput(e.target.value)}
-            disabled={quizSubmitted}
-            placeholder="Type your answer"
-            tabIndex={0}
-          />
-          <button
-            className="quiz-option-btn"
-            onClick={handleSubmit}
-            disabled={quizSubmitted || !quizInput.trim()}
-          >
-            Submit
-          </button>
-        </div>
-      );
-    }
-
-    return null;
-  };
-
-  // ----- Render Completion Screen -----
-  const renderComplete = () => {
-    const correct = quizResults.filter(r => r.correct).length;
-    const total = quizResults.length;
-    const totalXp = xp + flashcardSessionStats.xp;
-    const totalScore = `${correct} / ${total}`;
-    const totalStreak = Math.max(maxStreak, flashcardSessionStats.maxStreak);
-
+  if (!deck || deck.length === 0) {
     return (
-      <div className="lesson-complete">
-        <MascotFace mood="happy" />
-        <h2>Session Complete!</h2>
-        <div className="xp-summary">
-          <span>XP Earned: <b>{totalXp}</b></span>
-          <span>Quiz Score: <b>{totalScore}</b></span>
-        </div>
-        <div className="streak-summary">
-          {totalStreak > 1 && (
-            <span>🔥 Longest Streak: {totalStreak} correct in a row!</span>
-          )}
-        </div>
-        <button className="lesson-restart-btn" onClick={() => onComplete({
-          xp: totalXp,
-          score: totalScore,
-          streak: totalStreak
-        })}>
-          Back to Dashboard
-        </button>
+      <div className={`flashcard-viewer${darkMode ? " dark" : ""}`}>
+        <div>No flashcards to display.</div>
       </div>
     );
-  };
-
-  // ----- FlashcardViewer Completion Handler -----
-  function handleFlashcardSessionComplete(stats) {
-    setFlashcardSessionStats(stats);
-    setXp((prev) => prev + stats.xp);
-    setStep(1); // Move to quizzes
   }
 
-  // ----- Main Render -----
+  function handlePrev() {
+    setFlipped(false);
+    updatePerCardTime();
+    setCurrent((c) => (c === 0 ? deck.length - 1 : c - 1));
+  }
+
+  function handleNext() {
+    setFlipped(false);
+    updatePerCardTime();
+    setCurrent((c) => (c === deck.length - 1 ? 0 : c + 1));
+  }
+
+  function handleFlip() {
+    setFlipped((f) => !f);
+    if (!flipped) {
+      setSessionStats((s) => ({
+        ...s,
+        viewed: s.viewed + 1,
+      }));
+    }
+  }
+
+  function markKnown(isKnown) {
+    setKnown((k) => ({
+      ...k,
+      [deck[current].question]: isKnown,
+    }));
+    setSessionStats((s) => ({
+      ...s,
+      correct: isKnown ? s.correct + 1 : s.correct,
+      incorrect: !isKnown ? s.incorrect + 1 : s.incorrect,
+    }));
+    handleNext();
+  }
+
+  function handleShuffle() {
+    const shuffled = shuffleArray(deck);
+    setDeck(shuffled);
+    setCurrent(0);
+    setFlipped(false);
+    setShuffle(true);
+    setSessionStats((s) => ({
+      ...s,
+      startTime: Date.now(),
+      totalTime: 0,
+      perCardTime: {},
+      viewed: 0,
+      correct: 0,
+      incorrect: 0,
+    }));
+    setKnown({});
+  }
+
+  function handleReset() {
+    setDeck(flashcards.slice());
+    setCurrent(0);
+    setFlipped(false);
+    setShuffle(false);
+    setSessionStats({
+      correct: 0,
+      incorrect: 0,
+      viewed: 0,
+      startTime: Date.now(),
+      totalTime: 0,
+      perCardTime: {},
+    });
+    setKnown({});
+  }
+
+  function updatePerCardTime() {
+    const now = Date.now();
+    const elapsed = Math.floor((now - cardStartTimeRef.current) / 1000);
+    setSessionStats((s) => ({
+      ...s,
+      perCardTime: {
+        ...s.perCardTime,
+        [deck[current].question]: (s.perCardTime[deck[current].question] || 0) + elapsed,
+      },
+    }));
+    cardStartTimeRef.current = now;
+  }
+
+  function handleExport() {
+    const data = {
+      known,
+      sessionStats,
+      deck,
+      current,
+      shuffle,
+      darkMode,
+    };
+    setImportExportData(JSON.stringify(data, null, 2));
+    setImportExportOpen(true);
+  }
+
+  function handleImport() {
+    try {
+      const data = JSON.parse(importExportData);
+      if (
+        data.deck &&
+        data.deck.length === flashcards.length &&
+        data.deck.every((c, i) => c.question === flashcards[i].question)
+      ) {
+        setDeck(data.deck);
+        setKnown(data.known || {});
+        setSessionStats(data.sessionStats || sessionStats);
+        setCurrent(data.current || 0);
+        setShuffle(data.shuffle || false);
+        setDarkMode(data.darkMode || false);
+        setImportExportOpen(false);
+      } else {
+        alert("Deck mismatch or invalid data.");
+      }
+    } catch (e) {
+      alert("Invalid JSON.");
+    }
+  }
+
+  function handleTtsToggle() {
+    setTtsEnabled((t) => !t);
+  }
+
+  function handleDarkModeToggle() {
+    setDarkMode((d) => !d);
+  }
+
+  function handleShowStats() {
+    setShowStats((s) => !s);
+  }
+
+  // Responsive font size
+  const fontSize =
+    deck[current]?.question.length > 120 || deck[current]?.answer.length > 120
+      ? "1rem"
+      : "1.18rem";
+
+  // Progress bar
+  const progress =
+    ((Object.keys(known).length / deck.length) * 100).toFixed(1);
+
+  // Per-card time
+  const perCardTime =
+    sessionStats.perCardTime[deck[current].question] || 0;
+
+  // Accessibility: aria-live for card content
   return (
-    <div className="lesson-quiz-session">
-      <div className="lesson-header">
-        <MascotFace mood={mascotMood} />
-        <XPBar
-          progress={xp + flashcardSessionStats.xp}
-          total={flashcards.length * 5 + quizzes.length * 10}
-        />
+    <div className={`flashcard-viewer${darkMode ? " dark" : ""}`}>
+      <div className="flashcard-toolbar">
+        <button onClick={handleShuffle} title="Shuffle deck">
+          🔀 Shuffle
+        </button>
+        <button onClick={handleReset} title="Reset progress">
+          ♻️ Reset
+        </button>
+        <button onClick={handleExport} title="Export progress">
+          ⬇️ Export
+        </button>
+        <button
+          onClick={() => setImportExportOpen(true)}
+          title="Import progress"
+        >
+          ⬆️ Import
+        </button>
+        <button onClick={handleDarkModeToggle} title="Toggle dark mode">
+          {darkMode ? "🌞 Light" : "🌙 Dark"}
+        </button>
+        <button onClick={handleTtsToggle} title="Toggle read aloud">
+          {ttsEnabled ? "🔊 TTS On" : "🔈 TTS Off"}
+        </button>
+        <button onClick={handleShowStats} title="Show stats">
+          📊 Stats
+        </button>
       </div>
-      {step === 0 && (
-        <div>
-          <div className="lesson-progress">
-            Flashcards ({flashcards.length})
+      <div className="flashcard-progress-bar">
+        <div
+          className="flashcard-progress"
+          style={{ width: `${progress}%` }}
+        ></div>
+      </div>
+      <div className="flashcard-controls">
+        <button onClick={handlePrev} aria-label="Previous card">
+          &lt; Prev
+        </button>
+        <span>
+          Card {current + 1} of {deck.length}
+        </span>
+        <button onClick={handleNext} aria-label="Next card">
+          Next &gt;
+        </button>
+      </div>
+      <div
+        className={`flashcard${flipped ? " flipped" : ""}`}
+        onClick={handleFlip}
+        tabIndex={0}
+        role="button"
+        aria-pressed={flipped}
+        title="Click to flip"
+        style={{ fontSize }}
+        aria-live="polite"
+      >
+        <div className="flashcard-front">
+          <strong>Q:</strong> {deck[current].question}
+        </div>
+        <div className="flashcard-back">
+          <strong>A:</strong> {deck[current].answer}
+        </div>
+      </div>
+      <div className="flashcard-actions">
+        <button
+          className={`known-btn${known[deck[current].question] === true ? " active" : ""}`}
+          onClick={() => markKnown(true)}
+          aria-label="Mark as known"
+        >
+          👍 Known
+        </button>
+        <button
+          className={`unknown-btn${known[deck[current].question] === false ? " active" : ""}`}
+          onClick={() => markKnown(false)}
+          aria-label="Mark as unknown"
+        >
+          👎 Unknown
+        </button>
+      </div>
+      <div className="flashcard-tip">
+        Click the card to flip. Use arrows or space/enter to navigate/flip.<br />
+        <span>
+          <b>Shortcuts:</b> ←/→: Prev/Next, Space/Enter: Flip, K/U: Known/Unknown
+        </span>
+      </div>
+      <div className="flashcard-status">
+        <span>
+          <b>Progress:</b> {Object.keys(known).length}/{deck.length} cards marked
+        </span>
+        <span>
+          <b>Session:</b> {formatTime(sessionStats.totalTime)}
+        </span>
+        <span>
+          <b>This card:</b> {formatTime(perCardTime)}
+        </span>
+      </div>
+      {importExportOpen && (
+        <div className="flashcard-modal">
+          <div className="flashcard-modal-content">
+            <h3>Import/Export Progress</h3>
+            <textarea
+              value={importExportData}
+              onChange={(e) => setImportExportData(e.target.value)}
+              rows={10}
+              style={{ width: "100%" }}
+            />
+            <div style={{ marginTop: "1rem" }}>
+              <button onClick={handleImport}>Import</button>
+              <button
+                onClick={() => {
+                  setImportExportOpen(false);
+                  setImportExportData("");
+                }}
+              >
+                Close
+              </button>
+            </div>
+            <div style={{ fontSize: "0.9rem", marginTop: "0.5rem" }}>
+              <b>Export:</b> Copy the above JSON to save your progress.<br />
+              <b>Import:</b> Paste previously exported JSON and click Import.
+            </div>
           </div>
-          <FlashcardViewer
-            flashcards={flashcards}
-            onSessionComplete={handleFlashcardSessionComplete}
-            sessionXpPerCard={5}
-            showSessionCompleteButton={true}
-            showProgressBar={true}
-            showKnownUnknown={true}
-            showStatsButton={true}
-            showTtsButton={true}
-            showDarkModeButton={true}
-            showImportExportButton={true}
-          />
-          <button
-            className="lesson-next-btn"
-            onClick={() => handleFlashcardSessionComplete({
-              xp: flashcardSessionStats.xp || (flashcards.length * 5),
-              completed: true,
-              knownCount: flashcardSessionStats.knownCount || 0,
-              unknownCount: flashcardSessionStats.unknownCount || 0,
-              timeSpent: flashcardSessionStats.timeSpent || 0,
-              streak: flashcardSessionStats.streak || 0,
-              maxStreak: flashcardSessionStats.maxStreak || 0,
-              score: flashcardSessionStats.score || "",
-            })}
-            style={{ marginTop: "1.5rem" }}
-          >
-            {flashcardSessionStats.completed ? "Continue to Quiz" : "Skip to Quiz"}
-          </button>
         </div>
       )}
-      {step === 1 && (
-        <div>
-          <div className="lesson-progress">
-            Quiz {quizIndex + 1} / {quizzes.length}
+      {showStats && (
+        <div className="flashcard-modal">
+          <div className="flashcard-modal-content">
+            <h3>Session Statistics</h3>
+            <ul>
+              <li>
+                <b>Cards viewed:</b> {sessionStats.viewed}
+              </li>
+              <li>
+                <b>Known:</b> {sessionStats.correct}
+              </li>
+              <li>
+                <b>Unknown:</b> {sessionStats.incorrect}
+              </li>
+              <li>
+                <b>Total time:</b> {formatTime(sessionStats.totalTime)}
+              </li>
+              <li>
+                <b>Average time per card:</b>{" "}
+                {formatTime(
+                  Math.floor(
+                    sessionStats.totalTime /
+                      (Object.keys(sessionStats.perCardTime).length || 1)
+                  )
+                )}
+              </li>
+            </ul>
+            <button onClick={handleShowStats}>Close</button>
           </div>
-          {renderQuizCard()}
         </div>
       )}
-      {step === 2 && renderComplete()}
     </div>
   );
 }
 
-export default LessonQuizSession;
+export default FlashcardViewer;
